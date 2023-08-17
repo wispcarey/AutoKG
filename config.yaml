@@ -1,0 +1,6 @@
+OPENAI_API_KEY: "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"
+OPENAI_API_MODEL: "gpt-3.5-turbo-16k"
+EMBEDDING_MODEL: "text-embedding-ada-002"
+
+
+
