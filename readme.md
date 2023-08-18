@@ -31,6 +31,14 @@ Utilizing this graph structure, we have devised a hybrid search scheme that cond
 
 A concrete example with a localized visualization of the knowledge graph will follow, further illustrating how AutoKG functions and demonstrating its potential to offer more insightful and comprehensive responses from language models.
 
+## Flowcharts
+Here we use two flowcharts to illustrate our proposed automated KG construction method and mixture search method.
+### Keywords Extraction and KG Construction
+![Keywords Extraction and KG Construction](Keywords%20Extraction%20and%20KG%20Construction.jpg)
+### Mixture Search: Vector Similarity + KG
+![Mixture Search: Vector Similarity + KG](Mixture%20search.jpg)
+
+
 ## How to Use
 1. **Clone the Repository**: `git clone https://github.com/wispcarey/AutoKG.git`
 2. **Prerequisites**: Python 3.9 or 3.10
