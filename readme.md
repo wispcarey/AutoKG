@@ -34,9 +34,9 @@ A concrete example with a localized visualization of the knowledge graph will fo
 ## Flowcharts
 Here we use two flowcharts to illustrate our proposed automated KG construction method and mixture search method.
 ### Keywords Extraction and KG Construction
-![Keywords Extraction and KG Construction](Keywords%20Extraction%20and%20KG%20Construction.jpg)
+![Keywords Extraction and KG Construction](Flowchart1.jpg)
 ### Mixture Search: Vector Similarity + KG
-![Mixture Search: Vector Similarity + KG](Mixture%20search.jpg)
+![Mixture Search: Vector Similarity + KG](Flowchart2.jpg)
 
 
 ## How to Use
