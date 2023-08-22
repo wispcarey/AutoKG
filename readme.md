@@ -43,6 +43,7 @@ Here we use two flowcharts to illustrate our proposed automated KG construction 
 1. **Clone the Repository**: `git clone https://github.com/wispcarey/AutoKG.git`
 2. **Prerequisites**: Python 3.9 or 3.10
 3. **Installation**: Install necessary packages:`pip install -r requirements.txt`
+4. **Your OpenAI API key**: Input your openai api key in `config`
 
 ## Chat with the Knowledge graph 
 We offer a concrete example to demonstrate how to construct a 
