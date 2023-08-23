@@ -85,3 +85,26 @@ The other is selected from the related corpus of selected keywords. The subgraph
 >Additionally, there are methods that distill knowledge from LLMs to construct KGs. These methods use existing tuples as a seed set of knowledge on which to train the LLMs. The LLMs learn to adapt their learned representations to knowledge generation and produce novel tuples that are of high quality. Experimental results have shown that implicit knowledge from LLMs can be transferred to generate explicit knowledge in KGs.
 >
 >Overall, pre-trained LLMs can be used to construct KGs by leveraging their ability to generate diverse prompts, perform reasoning on KGs, and distill knowledge. These approaches provide a way to utilize the knowledge stored in LLMs to construct structured and interpretable knowledge graphs.
+>
+## License
+MIT License
+
+Copyright (c) 2023 Bohan Chen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
