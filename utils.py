@@ -99,7 +99,7 @@ def clean_text(text):
 
 def my_text_splitter(input_text, chunk_size=200, separator=None, model='gpt-3.5-turbo-16k'):
     if separator is None:
-        separator = ["\n\n", ".", " ", ""]
+        separator = ["\n\n", ".", " "]
 
     if not separator:
         return []
@@ -162,7 +162,7 @@ def load_and_process_files(directory,
     Then segment them into text chunks
     '''
     if separator is None:
-        separator = ["\n\n", "\n", ". ", " ", ""]
+        separator = ["\n\n", "\n", ". ", " "]
 
     raw_texts = []
     raw_sources = []
