@@ -1083,34 +1083,4 @@ Your response:
 
         return knn_ind, knn_dist
 
-    @staticmethod
-    def create_sparse_matrix_A(U, L):
-        def check_list_L(L):
-            min_L = min(L)
-            max_L = max(L)
-            if min_L != 0 or max_L >= len(L):
-                return False
-
-            for i in range(min_L + 1, max_L):
-                if i not in L:
-                    return False
-
-            return True
-
-        if not check_list_L(L):
-            raise ValueError("List L does not satisfy the conditions.")
-
-        n, d = U.shape
-        A = lil_matrix((len(L), len(L)), dtype=np.int32)
-
-        for row in range(n):
-            nonzero_indices = np.nonzero(U[row, :])[0]
-            for i in range(len(nonzero_indices)):
-                for j in range(i + 1, len(nonzero_indices)):
-                    idx_i, idx_j = nonzero_indices[i], nonzero_indices[j]
-                    if L[idx_i] != L[idx_j]:
-                        A[L[idx_i], L[idx_j]] += 1
-                        A[L[idx_j], L[idx_i]] += 1
-
-        return A
 
