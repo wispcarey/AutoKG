@@ -17,7 +17,7 @@ import time
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 
 from utils import *
 

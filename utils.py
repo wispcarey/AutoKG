@@ -5,10 +5,26 @@ import string
 import time
 import openai
 import traceback
+import yaml
 
 from docx import Document
 from PyPDF2 import PdfReader
 import pandas as pd
+
+with open("config.yaml", 'r') as stream:
+    try:
+        params = yaml.safe_load(stream)
+    except yaml.YAMLError as exc:
+        print(exc)
+
+
+COMPLETIONS_MODEL = params["OPENAI_API_MODEL"]
+EMBEDDING_MODEL = params["EMBEDDING_MODEL"]
+my_api_key = params["OPENAI_API_KEY"]
+openai.api_key = my_api_key
+
+os.environ['OPENAI_API_KEY'] = my_api_key
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
 def get_num_tokens(texts, model):
     num_tokens = []
@@ -17,42 +33,88 @@ def get_num_tokens(texts, model):
         num_tokens.append(len(encoding.encode(text)))
     return num_tokens
 
-def get_completion(prompt, model_name="gpt-3.5-turbo-16k", max_tokens=256, retry_times=3, temperature=0.1, top_p=0.3):
-    for i in range(retry_times):
-        try:
-            t = time.time()
-            if model_name.startswith("gpt-3.5") or model_name.startswith("gpt-4"):
-                messages = [{"role": "user", "content": prompt}]
-                response = openai.ChatCompletion.create(
-                    model=model_name,
-                    messages=messages,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                    top_p=top_p,
-                )
-                result = response.choices[0].message["content"]
-            else:
-                response = openai.Completion.create(
-                    model=model_name,
-                    prompt=prompt,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                    top_p=top_p,
-                )
-                result = response.choices[0].text
+## old function
+# def get_completion(prompt, model_name="gpt-3.5-turbo-16k", max_tokens=256, retry_times=3, temperature=0.1, top_p=0.3):
+#     for i in range(retry_times):
+#         try:
+#             t = time.time()
+#             if model_name.startswith("gpt-3.5") or model_name.startswith("gpt-4"):
+#                 messages = [{"role": "user", "content": prompt}]
+#                 response = openai.ChatCompletion.create(
+#                     model=model_name,
+#                     messages=messages,
+#                     temperature=temperature,
+#                     max_tokens=max_tokens,
+#                     top_p=top_p,
+#                 )
+#                 result = response.choices[0].message["content"]
+#             else:
+#                 response = openai.Completion.create(
+#                     model=model_name,
+#                     prompt=prompt,
+#                     temperature=temperature,
+#                     max_tokens=max_tokens,
+#                     top_p=top_p,
+#                 )
+#                 result = response.choices[0].text
+#
+#             t_completion = time.time() - t
+#             # 回答，所用时间，所用token
+#             return result, t_completion, response.usage.total_tokens
+#
+#         except Exception as e:
+#             if i < retry_times - 1:
+#                 if model_name.startswith("gpt-4"):
+#                     time.sleep(25)
+#                 else:
+#                     time.sleep(1)
+#             else:
+#                 raise ValueError(f"Max retries exceeded. Error: {e}")
 
-            t_completion = time.time() - t
-            # 回答，所用时间，所用token
-            return result, t_completion, response.usage.total_tokens
+## new function
+def get_completion(prompt, model_name="gpt-4", max_tokens=250, retry_times=3, temperature=0.9, top_p=1.0):
+    """
+    Generate chat completions using the OpenAI API.
+
+    Parameters:
+    - prompt: The input prompt for the chat.
+    - model: The model to use for generating completions. Default is "gpt-4".
+    - temperature: Controls randomness. Lower values make the model more deterministic. Default is 0.9.
+    - max_tokens: The maximum number of tokens to generate. Default is 250.
+    - top_p: Controls diversity via nucleus sampling: 0.5 means only the most probable 50% of tokens are considered. Default is 1.0.
+    - retry_times: Number of retries if the request fails. Default is 3.
+
+    Returns:
+    A dictionary with the response message, time taken for the request, and tokens consumed.
+    """
+
+    client = openai.OpenAI(api_key=OPENAI_API_KEY)
+
+    for attempt in range(retry_times):
+        try:
+            start_time = time.time()
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                model=model_name,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                top_p=top_p
+            )
+            end_time = time.time()
+
+            response = chat_completion.choices[0].message.content
+            time_taken = end_time - start_time
+            tokens_used = chat_completion.usage.total_tokens
+
+            return response, time_taken, tokens_used
 
         except Exception as e:
-            if i < retry_times - 1:
-                if model_name.startswith("gpt-4"):
-                    time.sleep(25)
-                else:
-                    time.sleep(1)
-            else:
-                raise ValueError(f"Max retries exceeded. Error: {e}")
+            print(f"Attempt {attempt + 1} failed: {e}")
+            time.sleep(60)  # Wait for 60 seconds before retrying
+
+    raise ValueError("Failed to generate completion after retrying.")
 
 def process_strings(strings):
     def normalize(s):
