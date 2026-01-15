@@ -1,6 +1,6 @@
-OPENAI_API_KEY: "your openai api key"
-OPENAI_API_MODEL: "gpt-3.5-turbo"
-EMBEDDING_MODEL: "text-embedding-ada-002"
+OPENAI_API_KEY: "your-api-key"
+OPENAI_API_MODEL: "gpt-4.1-mini"
+EMBEDDING_MODEL: "text-embedding-3-large"
 
 
 

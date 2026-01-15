@@ -1,7 +1,6 @@
 import sys
 
 import numpy as np
-import openai
 from annoy import AnnoyIndex
 from scipy import sparse
 from scipy.sparse import diags, csr_matrix
@@ -17,29 +16,42 @@ import time
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from langchain_openai import OpenAIEmbeddings
+from openai_client import OpenAIHelper
+
 
 from utils import *
 
 class autoKG():
     def __init__(self, texts: list, source: list, embedding_model: str, llm_model: str, openai_api_key: str,
-                 main_topic: str,
-                 embedding: bool = True):
-        openai.api_key = openai_api_key
+             main_topic: str,
+             embedding: bool = True):
         self.texts = texts
         self.embedding_model = embedding_model
         self.llm_model = llm_model
         self.source = source
 
-        self.embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+        # New: OpenAI helper (v1 SDK)
+        self.helper = OpenAIHelper(
+            api_key=openai_api_key,
+            embedding_model=embedding_model,
+            llm_model=llm_model
+        )
+
         if embedding:
-            self.vectors = np.array(self.embeddings.embed_documents(self.texts))
+            self.vectors = np.array(self.helper.embed_documents(self.texts))
         else:
             self.vectors = None
 
+        # Critical: graph-related attributes
         self.weightmatrix = None
         self.graph = None
-        self.encoding = tiktoken.encoding_for_model(llm_model)
+
+        # New: robust tokenizer fallback
+        try:
+            self.encoding = tiktoken.encoding_for_model(llm_model)
+        except KeyError:
+            self.encoding = tiktoken.get_encoding("cl100k_base")
+
         if texts is None:
             self.token_counts = None
         else:
@@ -60,16 +72,13 @@ class autoKG():
         self.temperature = 0.1
         self.top_p = 0.5
 
+
     def get_embedding(self, text):
-        result = openai.Embedding.create(
-            model=self.embedding_model,
-            input=text
-        )
-        return result["data"][0]["embedding"]
+        return self.helper.embed_query(text)
 
     def update_keywords(self, keyword_list):
         self.keywords = keyword_list
-        self.keyvectors = np.array(self.embeddings.embed_documents(self.keywords))
+        self.keyvectors = np.array(self.helper.embed_documents(self.keywords))
 
     def make_graph(self, k, method='annoy', similarity='angular', kernel='gaussian'):
         knn_data = gl.weightmatrix.knnsearch(self.vectors, k, method, similarity)
@@ -222,7 +231,7 @@ Processed Keywords:
                 i -= 1
 
         self.keywords = strings
-        self.keyvectors = np.array(self.embeddings.embed_documents(self.keywords))
+        self.keyvectors = np.array(self.helper.embed_documents(self.keywords))
         return strings
 
     def final_keywords_filter(self):
@@ -315,7 +324,7 @@ Your processed keywords:
         all_tokens += tokens
 
         self.keywords = keyword_string.split(",")
-        self.keyvectors = np.array(self.embeddings.embed_documents(self.keywords))
+        self.keyvectors = np.array(self.helper.embed_documents(self.keywords))
         return keyword_string, all_tokens
 
     def summary_contents(self, indx, sort_inds, avoid_content=None,
@@ -481,7 +490,7 @@ Your response:
         cluster_names = list(set(cluster_names))
         output_keywords = list(set(self.keywords or []) | set(cluster_names)) if add_keywords else cluster_names
         self.keywords = process_strings(output_keywords)
-        self.keyvectors = np.array(self.embeddings.embed_documents(self.keywords))
+        self.keyvectors = np.array(self.helper.embed_documents(self.keywords))
 
         return cluster_names, all_tokens
 
@@ -489,7 +498,7 @@ Your response:
     def distance_core_seg(self, core_texts, core_labels=None, k=20,
                           dist_metric='cosine', method='annoy', return_full=False, return_prob=False):
         # consider to write coresearch into a subclass
-        core_ebds = np.array(self.embeddings.embed_documents(core_texts))
+        core_ebds = np.array(self.helper.embed_documents(core_texts))
         if core_labels is None:
             core_labels = np.arange(len(core_ebds))
         else:
@@ -647,13 +656,13 @@ Your response:
             is_valid = False
         if self.keyvectors is None:
             if auto_embedding:
-                self.keyvectors = np.array(self.embeddings.embed_documents(self.keywords))
+                self.keyvectors = np.array(self.helper.embed_documents(self.keywords))
             else:
                 print('Please set up keyword embedding vectors as self.keyvectors')
                 is_valid = False
         if self.vectors is None:
             if auto_embedding:
-                self.keyvectors = np.array(self.embeddings.embed_documents(self.texts))
+                self.vectors = np.array(self.helper.embed_documents(self.texts))
             else:
                 print('Please set up texts embedding vectors as self.vectors')
                 is_valid = False
@@ -681,9 +690,9 @@ Your response:
             raise ValueError('Missing Contents')
 
         if isinstance(query, str):
-            query_vec = np.array(self.embeddings.embed_documents([query]))
+            query_vec = np.array(self.helper.embed_documents([query]))
         elif isinstance(query, list):
-            query_vec = np.array(self.embeddings.embed_documents(query))
+            query_vec = np.array(self.helper.embed_documents(query))
         else:
             raise ValueError("query should be either string or list")
 
